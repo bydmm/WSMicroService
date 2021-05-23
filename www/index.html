@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>你好世界</title>
+</head>
+<body>
+    <div>
+        <label>请输入你的名字:
+            <input id="name" name="name" autocomplete="name">
+        </label>
+        <button id="submit">提交</button>
+    </div>
+
+    <script>
+        var actionCallbacks = {};
+
+        // Create WebSocket connection.
+        const socket = new WebSocket('ws://172.21.210.222:8081/ws');
+
+        // Connection opened
+        socket.addEventListener('open', function (event) {
+            console.log("connect...");
+        });
+
+        // Listen for messages
+        socket.addEventListener('message', function (event) {
+            const response = JSON.parse(event.data);
+            var f = actionCallbacks[response.rid];
+            f(response);
+        });
+
+        function Send(dataJSON, callback) {
+
+        }
+
+        document.getElementById("submit").addEventListener("click", function(){
+            var name = document.getElementById("name").value;
+            rid = makeid(10);
+            var request = {
+                rid: rid,
+                action: "classServer",
+                data: {
+                    name: name,
+                },
+            }
+            var dataJSON = JSON.stringify(request);
+            socket.send(dataJSON);
+            actionCallbacks[rid] = function (response) {
+                alert(response.data);
+            }
+        });
+
+        function makeid(length) {
+            var result           = [];
+            var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var charactersLength = characters.length;
+            for ( var i = 0; i < length; i++ ) {
+                result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+            }
+            return result.join('');
+        }
+
+    </script>
+</body>
+</html>
